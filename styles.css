@@ -90,3 +90,6 @@ input[type=text],input[type=number],input[type=datetime-local]{width:100%;backgr
   .sheet{max-width:640px}
   .big{font-size:44px}
 }
+
+/* franja bajo la barra de estado de iOS: evita que el contenido se superponga con la hora y la batería al hacer scroll */
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:25}

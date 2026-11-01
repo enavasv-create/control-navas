@@ -1,7 +1,7 @@
 /* CONTROL - interfaz y almacenamiento (IndexedDB). */
 (function () {
   'use strict';
-  const APP_VERSION = '1.1.1'; // mantener igual que VERSION en sw.js
+  const APP_VERSION = '1.1.2'; // mantener igual que VERSION en sw.js
   const C = window.Core;
   const V = window.Vault;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -285,7 +285,7 @@
   async function deliver(blob, filename, mime) {
     const file = new File([blob], filename, { type: mime });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: filename }); return true; }
+      try { await navigator.share({ files: [file] }); return true; }
       catch (e) { if (e && e.name === 'AbortError') return false; }
     }
     const url = URL.createObjectURL(blob);

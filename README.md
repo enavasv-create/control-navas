@@ -3,7 +3,7 @@
 Control de gastos personales (PWA para iPhone/iPad). Sin servidor, sin cuentas, sin conexión a bancos.
 Los datos se guardan solo en el dispositivo (IndexedDB). El respaldo es un archivo que guarda el propietario.
 
-Versión: 1.1.1 (prueba)
+Versión: 1.1.2 (prueba)
 
 ## Archivos
 `index.html` · `app.js` (interfaz y almacenamiento) · `core.js` (lógica) · `xlsx.js` (exportar Excel) · `vault.js` (cifrado de respaldos) · `sw.js` (uso sin conexión) · `manifest.webmanifest` · `icons/`
