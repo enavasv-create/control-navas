@@ -1,7 +1,7 @@
 /* CONTROL - interfaz y almacenamiento (IndexedDB). */
 (function () {
   'use strict';
-  const APP_VERSION = '1.1.2'; // mantener igual que VERSION en sw.js
+  const APP_VERSION = '1.1.3'; // mantener igual que VERSION en sw.js
   const C = window.Core;
   const V = window.Vault;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -79,7 +79,7 @@
       if (o.body) h += '<p class="note" style="white-space:pre-line">' + esc(o.body) + '</p>';
       (o.fields || []).forEach((f) => {
         h += '<input id="m_' + f.id + '" type="' + (f.type || 'text') + '" placeholder="' + esc(f.placeholder || '') +
-          '" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">';
+          '" autocomplete="' + (f.ac || 'off') + '" autocapitalize="off" autocorrect="off" spellcheck="false">';
       });
       h += '<div class="err small" style="color:var(--bad);min-height:18px"></div><div class="dbtns">' +
         o.buttons.map((b) => '<button class="btn' + (b.primary ? ' primary' : '') + (b.danger ? ' dangerbtn' : '') + '" data-b="' + esc(b.id) + '">' + esc(b.label) + '</button>').join('') +
@@ -312,7 +312,7 @@
     const r = await ask({
       title: 'Respaldo cifrado',
       body: 'Elige una contraseña de al menos 8 caracteres.\nSi la olvidas, el respaldo NO se puede abrir y no existe forma de recuperarla. Anótala en un lugar seguro, aparte del teléfono.',
-      fields: [{ id: 'p1', type: 'password', placeholder: 'Contraseña' }, { id: 'p2', type: 'password', placeholder: 'Repite la contraseña' }],
+      fields: [{ id: 'p1', type: 'password', placeholder: 'Contraseña', ac: 'new-password' }, { id: 'p2', type: 'password', placeholder: 'Repite la contraseña', ac: 'new-password' }],
       buttons: [{ id: 'no', label: 'Cancelar' }, { id: 'ok', label: 'Continuar', primary: true }],
       validate: (b, v) => (b === 'no' ? null : v.p1.length < 8 ? 'Mínimo 8 caracteres.' : v.p1 !== v.p2 ? 'Las contraseñas no coinciden.' : null),
     });
@@ -395,7 +395,7 @@
     if (V.isEncrypted(text)) {
       for (;;) {
         const r = await ask({ title: 'Respaldo cifrado', body: 'Escribe la contraseña con la que se creó este respaldo.',
-          fields: [{ id: 'p', type: 'password', placeholder: 'Contraseña' }],
+          fields: [{ id: 'p', type: 'password', placeholder: 'Contraseña', ac: 'current-password' }],
           buttons: [{ id: 'no', label: 'Cancelar' }, { id: 'ok', label: 'Descifrar', primary: true }] });
         if (r.btn !== 'ok') return;
         toast('Descifrando…');
