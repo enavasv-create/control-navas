@@ -2,7 +2,7 @@
  * Funciona en subrutas (GitHub Pages: /control-navas/) porque todas las rutas son relativas.
  * Para publicar una corrección: subir los archivos y cambiar VERSION aquí y APP_VERSION en app.js.
  * No toca los datos del usuario (viven en IndexedDB). */
-const VERSION = '1.1.0';
+const VERSION = '1.1.1';
 const CACHE = 'control-' + VERSION;
 const SHELL = ['./', 'index.html', 'styles.css', 'core.js', 'xlsx.js', 'vault.js', 'app.js',
   'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];

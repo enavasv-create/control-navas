@@ -1,7 +1,7 @@
 /* CONTROL - interfaz y almacenamiento (IndexedDB). */
 (function () {
   'use strict';
-  const APP_VERSION = '1.1.0'; // mantener igual que VERSION en sw.js
+  const APP_VERSION = '1.1.1'; // mantener igual que VERSION en sw.js
   const C = window.Core;
   const V = window.Vault;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -504,6 +504,9 @@
       await saveSettings(); toast('Categoría renombrada');
     }
   });
+
+  // iOS: evita el zoom por pellizco/doble toque dentro de la app
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((n) => document.addEventListener(n, (e) => e.preventDefault()));
 
   // ---------- Inicio ----------
   async function init() {
