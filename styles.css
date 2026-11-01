@@ -93,3 +93,7 @@ input[type=text],input[type=number],input[type=datetime-local]{width:100%;backgr
 
 /* franja bajo la barra de estado de iOS: evita que el contenido se superponga con la hora y la batería al hacer scroll */
 body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:25}
+
+/* aviso: totalmente oculto cuando no se muestra (antes quedaba visible si el mensaje era largo) */
+#toast{opacity:0;pointer-events:none;transform:translate(-50%,-250%);transition:transform .25s,opacity .25s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
