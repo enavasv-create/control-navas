@@ -1,25 +1,17 @@
 {
-  "name": "CONTROL — Prueba v0.5",
+  "name": "CONTROL",
   "short_name": "CONTROL",
-  "description": "Prueba local de registro de gastos con guardado, respaldo y Excel; solo datos ficticios.",
-  "lang": "es-CL",
+  "description": "Control de gastos personales",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#101214",
-  "theme_color": "#151719",
+  "orientation": "any",
+  "background_color": "#17191c",
+  "theme_color": "#1b1d21",
+  "lang": "es",
   "icons": [
-    {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

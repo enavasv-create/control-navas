@@ -1,9 +1,0 @@
-CONTROL v0.5 — PRUEBA CON DATOS FICTICIOS
-
-Registra gastos y guárdalos en almacenamiento local del navegador. Exporta movimientos Excel (.xlsx) y respaldo completo JSON desde Historial; restaura un respaldo JSON en esa misma pantalla.
-
-ADVERTENCIA: los datos locales pueden desaparecer al borrar la app, sus datos o por políticas del navegador. Los respaldos JSON NO están cifrados. No utilices información financiera real en esta versión. Safari normal y la app instalada pueden tener almacenamientos distintos.
-
-Prueba: publica los archivos en un alojamiento HTTPS, registra gastos ficticios, cierra y vuelve a abrir desde el mismo modo, comprueba historial, exporta Excel, descarga respaldo, registra otro gasto y restaura para verificar recuperación. La instalación y la funcionalidad offline aún requieren validación física en iPhone.
-
-No hay sincronización entre dispositivos ni conexión a cuentas bancarias.
