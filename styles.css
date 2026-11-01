@@ -97,3 +97,9 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area
 /* aviso: totalmente oculto cuando no se muestra (antes quedaba visible si el mensaje era largo) */
 #toast{opacity:0;pointer-events:none;transform:translate(-50%,-250%);transition:transform .25s,opacity .25s}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* presupuesto por categoría */
+.cb{padding:12px 0;border-bottom:1px solid var(--line)}
+.cb:last-child{border-bottom:0;padding-bottom:2px}
+.cb:first-child{padding-top:2px}
+.cb .bar{margin-top:8px}

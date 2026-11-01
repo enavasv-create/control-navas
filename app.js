@@ -1,7 +1,7 @@
 /* CONTROL - interfaz y almacenamiento (IndexedDB). */
 (function () {
   'use strict';
-  const APP_VERSION = '1.1.5'; // mantener igual que VERSION en sw.js
+  const APP_VERSION = '1.2.0'; // mantener igual que VERSION en sw.js
   const C = window.Core;
   const V = window.Vault;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -47,7 +47,7 @@
 
   // ---------- Estado ----------
   let expenses = [];
-  let settings = { budget: 0, categories: C.DEFAULT_CATEGORIES.slice(), lastBackup: null };
+  let settings = { budget: 0, categoryBudgets: {}, categories: C.DEFAULT_CATEGORIES.slice(), lastBackup: null };
   let tab = 'home';
   let month = C.monthKey(new Date());
   let show = localStorage.getItem('control-show') === '1';
@@ -61,6 +61,7 @@
     const meta = await dbAll('meta');
     const s = meta.find((m) => m.key === 'settings');
     if (s) settings = Object.assign(settings, s.value);
+    if (!settings.categoryBudgets || typeof settings.categoryBudgets !== 'object') settings.categoryBudgets = {};
   }
   const saveSettings = () => dbPut('meta', { key: 'settings', value: settings });
   const money = (n) => (show ? C.formatMoney(n) : '$ ••••');
@@ -127,6 +128,21 @@
       '<li><span>' + esc(nameFn(k)) + '</span><span class="amt">' + money(v) + '</span></li>').join('') + '</ul></div>';
   }
 
+  function categoryBudgetsHtml(t) {
+    const cats = settings.categories.filter((c) => (settings.categoryBudgets[c] || 0) > 0);
+    if (!cats.length) return '';
+    return '<h2>Presupuesto por categoría</h2><div class="card">' + cats.map((c) => {
+      const b = settings.categoryBudgets[c];
+      const spent = t.byCategory[c] || 0;
+      const avail = b - spent;
+      const pct = Math.min(100, Math.round(spent / b * 100));
+      return '<div class="cb"><div class="row"><span>' + esc(c) + '</span><b class="num"' + (avail < 0 ? ' style="color:var(--bad)"' : '') + '>' +
+        (avail < 0 ? 'Excedido ' + money(-avail) : 'Quedan ' + money(avail)) + '</b></div>' +
+        '<div class="dim small num">Gastado ' + money(spent) + ' de ' + money(b) + '</div>' +
+        '<div class="bar' + (avail < 0 ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div></div>';
+    }).join('') + '</div>';
+  }
+
   function mvHtml(e) {
     return '<li class="tap" data-edit="' + esc(e.id) + '"><div class="mv-main"><div>' + esc(e.category) + '</div><div class="mv-sub">' +
       esc(C.methodName(e.method)) + ' · ' + C.dateStr(e.ts).split('-').reverse().join('-') + ' ' + C.timeStr(e.ts) +
@@ -149,6 +165,7 @@
       h += '<div class="note" style="margin-top:10px">Define un presupuesto mensual en Ajustes.</div>';
     }
     h += '</div>';
+    h += categoryBudgetsHtml(t);
     h += breakdownHtml('Por categoría', C.sortedEntries(t.byCategory), (k) => k);
     h += breakdownHtml('Por medio de pago', C.sortedEntries(t.byMethod), C.methodName);
     h += '<h2>Últimos movimientos</h2><div class="card">' + (list.length
@@ -178,6 +195,10 @@
     let h = '<h1>Ajustes</h1>';
     h += '<h2>Presupuesto mensual</h2><div class="card"><input id="budget" type="text" inputmode="numeric" placeholder="Ej: 800000" value="' + (settings.budget || '') + '">' +
       '<button class="btn" data-act="savebudget" style="margin:0">Guardar presupuesto</button></div>';
+    h += '<h2>Presupuesto por categoría</h2><div class="card">' + settings.categories.map((c, i) =>
+      '<div class="cat-edit"><div style="flex:1;align-self:center">' + esc(c) + '</div><input type="text" inputmode="numeric" data-cb="' + i +
+      '" placeholder="Sin límite" value="' + (settings.categoryBudgets[c] || '') + '" style="max-width:150px;text-align:right"></div>').join('') +
+      '<div class="note">Opcional y mensual. Cada gasto descuenta del presupuesto de su categoría y el disponible se ve en Inicio. Déjalo vacío para no limitar una categoría.</div></div>';
     h += '<h2>Categorías</h2><div class="card">' + settings.categories.map((c, i) =>
       '<div class="cat-edit"><input type="text" data-cat="' + i + '" value="' + esc(c) + '"><button data-delcat="' + i + '" aria-label="Quitar">✕</button></div>').join('') +
       '<div class="cat-edit"><input type="text" id="newcat" placeholder="Nueva categoría"><button data-act="addcat" aria-label="Agregar">+</button></div>' +
@@ -363,6 +384,9 @@
   function applySettingsFrom(d, replace) {
     if (!d.settings) return;
     if (replace || !settings.budget) settings.budget = d.settings.budget || 0;
+    const cbk = d.settings.categoryBudgets || {};
+    if (replace) settings.categoryBudgets = Object.assign({}, cbk);
+    else Object.keys(cbk).forEach((k) => { if (!(k in settings.categoryBudgets)) settings.categoryBudgets[k] = cbk[k]; });
     const cats = new Set(replace ? [] : settings.categories);
     (d.settings.categories || []).forEach((c) => cats.add(c));
     expenses.forEach((e) => cats.add(e.category));
@@ -474,9 +498,9 @@
     }
     if (d.delcat !== undefined) {
       const c = settings.categories[+d.delcat];
-      const r = await ask({ title: 'Quitar categoría', body: '"' + c + '" dejará de aparecer en la lista. Los movimientos existentes conservan su categoría.',
+      const r = await ask({ title: 'Quitar categoría', body: '"' + c + '" dejará de aparecer en la lista y su presupuesto se elimina. Los movimientos existentes conservan su categoría.',
         buttons: [{ id: 'no', label: 'Cancelar' }, { id: 'yes', label: 'Quitar', danger: true }] });
-      if (r.btn === 'yes') { settings.categories.splice(+d.delcat, 1); await saveSettings(); render(); }
+      if (r.btn === 'yes') { settings.categories.splice(+d.delcat, 1); delete settings.categoryBudgets[c]; await saveSettings(); render(); }
     }
   });
   function keepNote() { const n = $('#note'); if (n && sheet) sheet.note = n.value; }
@@ -484,11 +508,21 @@
   document.addEventListener('change', async (ev) => {
     const t = ev.target;
     if (t.id === 'file' && t.files[0]) { const f = t.files[0]; t.value = ''; await doRestore(f); }
+    if (t.dataset && t.dataset.cb !== undefined && t.closest('#view')) { // presupuesto de una categoría
+      const c = settings.categories[+t.dataset.cb];
+      const n = parseInt((t.value || '').replace(/\D/g, ''), 10) || 0;
+      if (n > 0) settings.categoryBudgets[c] = n; else delete settings.categoryBudgets[c];
+      t.value = n > 0 ? String(n) : '';
+      await saveSettings();
+      toast(n > 0 ? 'Presupuesto de ' + c + ': ' + C.formatMoney(n) : c + ': sin límite');
+      return;
+    }
     if (t.dataset && t.dataset.cat !== undefined && t.closest('#view')) { // renombrar categoría
       const i = +t.dataset.cat, old = settings.categories[i], nu = t.value.trim();
       if (!nu || nu === old) { t.value = old; return; }
       if (settings.categories.includes(nu)) { toast('Esa categoría ya existe'); t.value = old; return; }
       settings.categories[i] = nu;
+      if (settings.categoryBudgets[old]) { settings.categoryBudgets[nu] = settings.categoryBudgets[old]; delete settings.categoryBudgets[old]; }
       const changed = expenses.filter((e) => e.category === old).map((e) => Object.assign({}, e, { category: nu, updatedAt: new Date().toISOString() }));
       for (const e of changed) await dbPut('expenses', e);
       expenses = expenses.map((e) => (e.category === old ? changed.find((c) => c.id === e.id) : e));

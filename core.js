@@ -99,7 +99,7 @@
       exportedAt: nowIso,
       count: expenses.length,
       total: expenses.reduce((s, e) => s + e.amount, 0),
-      settings: { budget: settings.budget, categories: settings.categories },
+      settings: { budget: settings.budget, categories: settings.categories, categoryBudgets: settings.categoryBudgets || {} },
       expenses: expenses,
     };
   }
