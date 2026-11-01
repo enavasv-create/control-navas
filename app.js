@@ -1,7 +1,7 @@
 /* CONTROL - interfaz y almacenamiento (IndexedDB). */
 (function () {
   'use strict';
-  const APP_VERSION = '1.1.4'; // mantener igual que VERSION en sw.js
+  const APP_VERSION = '1.1.5'; // mantener igual que VERSION en sw.js
   const C = window.Core;
   const V = window.Vault;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -186,7 +186,6 @@
       '<div class="note">Tus datos viven en este dispositivo (almacenamiento local). El respaldo es un archivo aparte que guardas fuera de la app (Archivos / iCloud Drive). Una cosa no reemplaza a la otra.</div>' +
       '<div class="note ' + (days === null || days > 7 ? 'warn' : '') + '">' + (lb ? 'Último respaldo creado: hace ' + days + ' día(s).' : 'Aún no has creado ningún respaldo.') + '</div>' +
       '<button class="btn primary" data-act="backup-enc">Crear respaldo cifrado (recomendado)</button>' +
-      '<button class="btn" data-act="backup">Crear respaldo sin cifrar</button>' +
       '<button class="btn" data-act="restore">Restaurar desde un respaldo…</button>' +
       '<button class="btn" data-act="snaps" style="margin:0">Copias internas previas…</button>' +
       '<input type="file" id="file" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px" tabindex="-1"></div>';
@@ -301,13 +300,6 @@
     if (tab === 'settings') render();
   }
 
-  async function doBackupPlain() {
-    const data = C.makeBackup(expenses, settings, new Date().toISOString());
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    const ok = await deliver(blob, 'CONTROL-respaldo-' + stamp() + '.json', 'application/json');
-    if (ok) { await markBackup(); toast('Respaldo sin cifrar creado: ' + data.count + ' movimientos'); }
-  }
-
   async function doBackupEnc() {
     const r = await ask({
       title: 'Respaldo cifrado',
@@ -326,7 +318,7 @@
       const chk = await V.decryptText(text, r.values.p1); // verificación inmediata
       if (!chk.ok || chk.text !== plain) throw new Error('verificación');
     } catch (e) {
-      await info('No se pudo crear el respaldo cifrado', 'Este dispositivo no pudo cifrar o verificar el archivo. No se creó ningún respaldo. Usa el respaldo sin cifrar o repórtalo.');
+      await info('No se pudo crear el respaldo cifrado', 'Este dispositivo no pudo cifrar o verificar el archivo. No se creó ningún respaldo. Repórtalo.');
       return;
     }
     // Segundo paso con un toque nuevo: iOS exige un gesto reciente del usuario para abrir la hoja de compartir.
@@ -467,7 +459,6 @@
       case 'eye': show = !show; localStorage.setItem('control-show', show ? '1' : '0'); render(); break;
       case 'xlsx': doXlsx(false); break;
       case 'xlsx-all': doXlsx(true); break;
-      case 'backup': doBackupPlain(); break;
       case 'backup-enc': doBackupEnc(); break;
       case 'restore': $('#file').click(); break;
       case 'snaps': showSnaps(); break;
